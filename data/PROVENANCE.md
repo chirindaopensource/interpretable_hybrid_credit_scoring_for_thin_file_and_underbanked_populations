@@ -23,7 +23,7 @@ is recorded below; no value in either corpus was altered.
 
 | File | Bytes | SHA-256 |
 |---|---|---|
-| `default of credit card clients.xls` (source of record, as distributed) | 5,539,328 | `30c6be3abd8dcfd3e6096c828bad8c2f011238620f5369220bd60cfc82700933` |
+| `default_of_credit_card_clients.xls` (source of record, as distributed) | 5,539,328 | `30c6be3abd8dcfd3e6096c828bad8c2f011238620f5369220bd60cfc82700933` |
 | `taiwan_credit_default.csv` (study-conformant) | 2,897,209 | `959736ebc535d84d4881eae09f54cd19cc9407a65ad4690d1c98d42f7a2cd6c2` |
 
 The downloaded ZIP had SHA-256
