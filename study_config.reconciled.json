@@ -1,0 +1,1318 @@
+{
+  "study_metadata": {
+    "title": "Interpretable hybrid credit scoring for thin-file and underbanked populations: A fairness-aware residual learning framework with evidence from East African financial inclusion data",
+    "authors": [
+      "Belise Kanziga",
+      "Yaé U. Gaba",
+      "Olivier Kanamugire"
+    ],
+    "affiliations": [
+      "African Institute for Mathematical Sciences (AIMS), Kigali, Rwanda",
+      "Sefako Makgatho University, Pretoria, South Africa",
+      "AI Research and Innovation Nexus for Africa (AIRINA Labs), Bénin"
+    ],
+    "corresponding_author_email": "belise.kanziga@aims.ac.rw",
+    "date": "August 27, 2026",
+    "keywords": [
+      "credit scoring",
+      "hybrid models",
+      "logistic regression",
+      "gradient boosting",
+      "interpretability",
+      "fairness in lending",
+      "financial inclusion",
+      "East Africa"
+    ],
+    "headline_results": {
+      "zindi_hybrid_auc": 0.869,
+      "zindi_brier_calibrated_hybrid": 0.085,
+      "zindi_ece_calibrated_hybrid": 0.024,
+      "taiwan_hybrid_auc": 0.776,
+      "taiwan_brier_calibrated_hybrid": 0.136,
+      "routing_gap_rural_vs_urban_pp": 18,
+      "routing_gap_primary_vs_secondary_pp": 32,
+      "routing_gap_uganda_vs_kenya_pp": 22,
+      "gender_routing_gap_pp": 0
+    }
+  },
+  "prompt_templates": {
+    "not_applicable_prompt": "Not applicable. This study does not use LLMs, prompt engineering, or natural-language generation. All model inputs are numeric feature vectors and all outputs are probability scores, interpretability ratios, fairness statistics, and SHAP attributions.",
+    "documentation_prompt": "Not applicable. Documentation is written manually in the paper's Code and Data Availability section; no automated prompt template is used."
+  },
+  "llm_configuration": {
+    "llm_names": null,
+    "llm_api_keys": null,
+    "llm_settings": null,
+    "note": "Not applicable; no large language model is used in the study."
+  },
+  "dataset_parameters": {
+    "zindi_fsd": {
+      "source_url": "https://zindi.africa/competitions/financial-inclusion-in-africa",
+      "reference": "Zindi and Financial Sector Deepening Network (2019)",
+      "n_observations": 23524,
+      "n_raw_columns": 13,
+      "features": [
+        "country",
+        "year",
+        "location_type",
+        "cellphone_access",
+        "gender_of_respondent",
+        "relationship_with_head",
+        "marital_status",
+        "education_level",
+        "job_type",
+        "household_size",
+        "age_of_respondent",
+        "uniqueid"
+      ],
+      "label_column": "bank_account",
+      "label_encoding": "1 = owns formal bank account; 0 = does not",
+      "positive_class_rate": 0.1408,
+      "country_composition": {
+        "Rwanda": 8735,
+        "Tanzania": 6620,
+        "Kenya": 6068,
+        "Uganda": 2101
+      },
+      "survey_years": [
+        2016,
+        2017,
+        2018
+      ],
+      "missing_value_count": 0,
+      "dropped_columns": {
+        "uniqueid": "unique-per-row identifier; no predictive content (Section 4.1)",
+        "year": "perfectly collinear with country; each survey year covers one country (Section 4.1)"
+      },
+      "label_semantics": "account ownership; deliberately reframed as eligibility-gate proxy (Section 4.2)",
+      "raw_column_order": [
+        "uniqueid",
+        "country",
+        "year",
+        "location_type",
+        "cellphone_access",
+        "gender_of_respondent",
+        "relationship_with_head",
+        "marital_status",
+        "education_level",
+        "job_type",
+        "household_size",
+        "age_of_respondent",
+        "bank_account"
+      ],
+      "categorical_levels": {
+        "country": [
+          "Kenya",
+          "Rwanda",
+          "Tanzania",
+          "Uganda"
+        ],
+        "location_type": [
+          "Urban",
+          "Rural"
+        ],
+        "cellphone_access": [
+          "Yes",
+          "No"
+        ],
+        "gender_of_respondent": [
+          "Female",
+          "Male"
+        ],
+        "relationship_with_head": [
+          "Head of Household",
+          "Spouse",
+          "Child",
+          "Parent",
+          "Other relative",
+          "Other non-relatives",
+          "Don't know/Refused"
+        ],
+        "marital_status": [
+          "Divorced/Seperated",
+          "Dont know",
+          "Married/Living together",
+          "Single/Never Married",
+          "Widowed"
+        ],
+        "education_level": [
+          "No formal education",
+          "Other/Dont know/RTA",
+          "Primary education",
+          "Secondary education",
+          "Tertiary education",
+          "Vocational/Specialised training"
+        ],
+        "job_type": [
+          "Dont Know/Refuse to answer",
+          "Farming and Fishing",
+          "Formally employed Government",
+          "Formally employed Private",
+          "Government Dependent",
+          "Informally employed",
+          "No Income",
+          "Other Income",
+          "Remittance Dependent",
+          "Self employed"
+        ]
+      }
+    },
+    "taiwan_credit_default": {
+      "source_url": "http://archive.ics.uci.edu/ml",
+      "reference": "Yeh, I.C., Lien, C.h. (2009); Dua & Graff (2019)",
+      "n_observations": 30000,
+      "n_features": 23,
+      "label_column": "default.payment.next.month",
+      "positive_class_rate_approx": 0.22,
+      "preprocessing_inherited": "inherited without modification from Kanziga (2026) thesis (Section 5, opening paragraph)",
+      "inherited_preprocessing_placeholder": "UNSPECIFIED IN MANUSCRIPT. If thesis code is unavailable, use: median/mode imputation; 1st/99th percentile winsorization; monotonic binning; WoE encoding for the logistic branch; one-hot encoding for the boosting branch.",
+      "protected_attributes_analysis": "not performed; Taiwan demographic columns are coarse and jurisdiction-specific (Section 4.3)"
+    },
+    "kiva_african_subset": {
+      "status": "excluded from present study (Section 4.4)",
+      "original_role": "robustness check on actual loan-adverse-outcome labels",
+      "future_work": "follow-up paper (Section 7.6)"
+    }
+  },
+  "raw_data_schemas": {
+    "zindi_fsd_schema": {
+      "source": "https://zindi.africa/competitions/financial-inclusion-in-africa",
+      "n_rows": 23524,
+      "n_columns": 13,
+      "columns": [
+        {
+          "name": "uniqueid",
+          "dtype": "object (str)",
+          "role": "row identifier; dropped before modelling",
+          "notes": "unique-per-row; no predictive content"
+        },
+        {
+          "name": "country",
+          "dtype": "object (str)",
+          "role": "model feature; protected attribute",
+          "notes": "Kenya, Rwanda, Tanzania, Uganda"
+        },
+        {
+          "name": "year",
+          "dtype": "int64",
+          "role": "excluded",
+          "notes": "perfectly collinear with country in this sample"
+        },
+        {
+          "name": "location_type",
+          "dtype": "object (str)",
+          "role": "model feature; protected attribute",
+          "notes": "Urban or Rural"
+        },
+        {
+          "name": "cellphone_access",
+          "dtype": "object (str)",
+          "role": "model feature; soft block; thin-file component",
+          "notes": "Yes or No; strongest soft proxy (IV=0.71)"
+        },
+        {
+          "name": "gender_of_respondent",
+          "dtype": "object (str)",
+          "role": "model feature; protected attribute",
+          "notes": "Male or Female"
+        },
+        {
+          "name": "relationship_with_head",
+          "dtype": "object (str)",
+          "role": "model feature; soft block",
+          "notes": "exhaustive levels in dataset_parameters.zindi_fsd.categorical_levels"
+        },
+        {
+          "name": "marital_status",
+          "dtype": "object (str)",
+          "role": "model feature; hard block",
+          "notes": "typo 'Divorced/Seperated' preserved verbatim"
+        },
+        {
+          "name": "education_level",
+          "dtype": "object (str)",
+          "role": "model feature; protected attribute; thin-file component",
+          "notes": "strongest predictor (IV=0.97)"
+        },
+        {
+          "name": "job_type",
+          "dtype": "object (str)",
+          "role": "model feature; soft block; thin-file component",
+          "notes": "IV=0.63; formal-job indicator derived from this column"
+        },
+        {
+          "name": "household_size",
+          "dtype": "int64",
+          "role": "model feature; hard block",
+          "notes": "winsorized at 1st and 99th percentiles"
+        },
+        {
+          "name": "age_of_respondent",
+          "dtype": "int64",
+          "role": "model feature; hard block",
+          "notes": "winsorized; rank-2 feature in residual-learner SHAP"
+        },
+        {
+          "name": "bank_account",
+          "dtype": "int64 (binary)",
+          "role": "label / target",
+          "notes": "positive rate 14.08%"
+        }
+      ],
+      "example_rows": [
+        [
+          "uniqueid_00001",
+          "Kenya",
+          2018,
+          "Rural",
+          "No",
+          "Female",
+          "Head of Household",
+          "Married/Living together",
+          "Primary education",
+          "Farming and Fishing",
+          5,
+          34,
+          0
+        ],
+        [
+          "uniqueid_00002",
+          "Rwanda",
+          2016,
+          "Urban",
+          "Yes",
+          "Male",
+          "Spouse",
+          "Married/Living together",
+          "Secondary education",
+          "Self employed",
+          3,
+          27,
+          1
+        ],
+        [
+          "uniqueid_00003",
+          "Tanzania",
+          2017,
+          "Rural",
+          "Yes",
+          "Female",
+          "Child",
+          "Single/Never married",
+          "No formal education",
+          "Remittance Dependent",
+          7,
+          19,
+          0
+        ]
+      ],
+      "column_order_note": "UNSPECIFIED IN MANUSCRIPT — declared above as the rational placeholder matching the public Zindi file layout."
+    },
+    "taiwan_credit_schema": {
+      "source": "http://archive.ics.uci.edu/ml",
+      "n_rows": 30000,
+      "n_columns": 25,
+      "columns": [
+        {
+          "name": "ID",
+          "dtype": "int64",
+          "role": "row identifier; not used as predictor",
+          "notes": "preserved from UCI layout"
+        },
+        {
+          "name": "LIMIT_BAL",
+          "dtype": "int64",
+          "role": "model feature",
+          "notes": "credit limit in NT dollars"
+        },
+        {
+          "name": "SEX",
+          "dtype": "int64 (categorical code)",
+          "role": "model feature",
+          "notes": "1=male, 2=female"
+        },
+        {
+          "name": "EDUCATION",
+          "dtype": "int64 (categorical code)",
+          "role": "model feature",
+          "notes": "1=graduate school, 2=university, 3=high school, 4=others; 0/5/6 unknown"
+        },
+        {
+          "name": "MARRIAGE",
+          "dtype": "int64 (categorical code)",
+          "role": "model feature",
+          "notes": "1=married, 2=single, 3=others; 0 unknown"
+        },
+        {
+          "name": "AGE",
+          "dtype": "int64",
+          "role": "model feature",
+          "notes": "age in years"
+        },
+        {
+          "name": "PAY_0",
+          "dtype": "int64 (categorical code)",
+          "role": "model feature",
+          "notes": "repayment status, most recent month; NO PAY_1 column in raw file"
+        },
+        {
+          "name": "PAY_2",
+          "dtype": "int64 (categorical code)",
+          "role": "model feature",
+          "notes": "repayment status, 2 months ago"
+        },
+        {
+          "name": "PAY_3",
+          "dtype": "int64 (categorical code)",
+          "role": "model feature",
+          "notes": "repayment status, 3 months ago"
+        },
+        {
+          "name": "PAY_4",
+          "dtype": "int64 (categorical code)",
+          "role": "model feature",
+          "notes": "repayment status, 4 months ago"
+        },
+        {
+          "name": "PAY_5",
+          "dtype": "int64 (categorical code)",
+          "role": "model feature",
+          "notes": "repayment status, 5 months ago"
+        },
+        {
+          "name": "PAY_6",
+          "dtype": "int64 (categorical code)",
+          "role": "model feature",
+          "notes": "repayment status, 6 months ago"
+        },
+        {
+          "name": "BILL_AMT1",
+          "dtype": "int64",
+          "role": "model feature",
+          "notes": "bill statement amount, most recent month"
+        },
+        {
+          "name": "BILL_AMT2",
+          "dtype": "int64",
+          "role": "model feature",
+          "notes": "bill statement amount, 2 months ago"
+        },
+        {
+          "name": "BILL_AMT3",
+          "dtype": "int64",
+          "role": "model feature",
+          "notes": "bill statement amount, 3 months ago"
+        },
+        {
+          "name": "BILL_AMT4",
+          "dtype": "int64",
+          "role": "model feature",
+          "notes": "bill statement amount, 4 months ago"
+        },
+        {
+          "name": "BILL_AMT5",
+          "dtype": "int64",
+          "role": "model feature",
+          "notes": "bill statement amount, 5 months ago"
+        },
+        {
+          "name": "BILL_AMT6",
+          "dtype": "int64",
+          "role": "model feature",
+          "notes": "bill statement amount, 6 months ago"
+        },
+        {
+          "name": "PAY_AMT1",
+          "dtype": "int64",
+          "role": "model feature",
+          "notes": "previous payment amount, most recent month"
+        },
+        {
+          "name": "PAY_AMT2",
+          "dtype": "int64",
+          "role": "model feature",
+          "notes": "previous payment amount, 2 months ago"
+        },
+        {
+          "name": "PAY_AMT3",
+          "dtype": "int64",
+          "role": "model feature",
+          "notes": "previous payment amount, 3 months ago"
+        },
+        {
+          "name": "PAY_AMT4",
+          "dtype": "int64",
+          "role": "model feature",
+          "notes": "previous payment amount, 4 months ago"
+        },
+        {
+          "name": "PAY_AMT5",
+          "dtype": "int64",
+          "role": "model feature",
+          "notes": "previous payment amount, 5 months ago"
+        },
+        {
+          "name": "PAY_AMT6",
+          "dtype": "int64",
+          "role": "model feature",
+          "notes": "previous payment amount, 6 months ago"
+        },
+        {
+          "name": "default.payment.next.month",
+          "dtype": "int64 (binary)",
+          "role": "label / target",
+          "notes": "1 = default in next month; positive rate ≈ 22%"
+        }
+      ],
+      "example_rows": [
+        [
+          1,
+          20000,
+          2,
+          2,
+          1,
+          24,
+          2,
+          2,
+          -1,
+          -1,
+          -2,
+          -2,
+          3913,
+          3102,
+          689,
+          0,
+          0,
+          0,
+          0,
+          689,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          3,
+          90000,
+          2,
+          2,
+          2,
+          34,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          29239,
+          14027,
+          13559,
+          14331,
+          14948,
+          15549,
+          1518,
+          1500,
+          1000,
+          1000,
+          1000,
+          5000,
+          0
+        ]
+      ]
+    },
+    "kiva_african_subset_schema": {
+      "status": "excluded from present study",
+      "schema": null,
+      "notes": "No raw schema is consumed by the published pipeline (Section 4.4)."
+    }
+  },
+  "partitioning_parameters": {
+    "method": "stratified random split",
+    "train_fraction": 0.6,
+    "validation_fraction": 0.2,
+    "test_fraction": 0.2,
+    "stratification_preserves": "marginal positive-class rate in each partition",
+    "zindi_train_n": 14114,
+    "zindi_test_n": 4705,
+    "zindi_test_positive_rate": 0.1407,
+    "test_usage": "reserved strictly for final evaluation (Section 5.3)",
+    "random_seed": 20260830
+  },
+  "preprocessing_parameters": {
+    "imputation": {
+      "numeric_method": "median",
+      "categorical_method": "mode",
+      "fit_on": "training partition only",
+      "apply_to": [
+        "training",
+        "validation",
+        "test"
+      ]
+    },
+    "winsorization": {
+      "lower_percentile": 0.01,
+      "upper_percentile": 0.99,
+      "fit_on": "training partition only"
+    },
+    "binning": {
+      "method": "monotonic binning of continuous predictors",
+      "fit_on": "training partition only",
+      "algorithm_placeholder": [
+        "1. Start with 20 quantile bins on the training partition.",
+        "2. Compute WoE_k = ln((g_k/G)/(b_k/B)) per bin.",
+        "3. Enforce monotonicity by merging adjacent bins whose WoE sequence changes direction.",
+        "4. Enforce a minimum bin frequency of 5% of training observations per bin; merge the least-frequent bin with its closest-WoE neighbour if violated."
+      ],
+      "algorithm_status": "UNSPECIFIED IN MANUSCRIPT — the procedure above is a rational placeholder; any monotonicity-preserving supervised binner is acceptable, but it must be frozen on training data only."
+    },
+    "logistic_branch_encoding": {
+      "method": "Weight of Evidence (WoE)",
+      "continuous_features": "monotonically binned",
+      "categorical_features": "WoE encoded",
+      "rare_category_rule": "assign neutral WoE = 0 for categories unseen in training",
+      "rare_category_rationale": "preserves log-odds-zero contribution; prevents information leakage",
+      "class_convention": "g_k = count of y=0 observations in bin k; b_k = count of y=1 observations in bin k; G = total y=0; B = total y=1",
+      "class_convention_status": "UNSPECIFIED IN MANUSCRIPT — orientation documented to prevent silent coefficient-sign drift"
+    },
+    "boosting_branch_encoding": {
+      "method": "one-hot encoding",
+      "unknown_level_rule": "all-zero indicator vector for levels unseen in training"
+    },
+    "information_value_filter": {
+      "threshold": 0.02,
+      "zindi_iv_values": {
+        "education_level": 0.97,
+        "cellphone_access": 0.71,
+        "job_type": 0.63
+      },
+      "zindi_result": "all ten features pass the filter"
+    },
+    "class_imbalance_handling": {
+      "method": "balanced class weighting",
+      "applied_to": [
+        "logistic regression",
+        "residual XGBoost",
+        "standalone XGBoost"
+      ],
+      "smote_ablation": {
+        "feature_space": "WoE-transformed",
+        "result": "no meaningful AUC improvement; rejected",
+        "source": "inherited from Kanziga (2026), reported in Section 5.1"
+      },
+      "scale_pos_weight": {
+        "formula": "scale_pos_weight = n_negative_train / n_positive_train = n0 / n1",
+        "fit_on": "training partition only",
+        "zindi_value": 6.1,
+        "formula_status": "UNSPECIFIED IN MANUSCRIPT — formula and value are rational placeholders; value must be recomputed from the actual training partition"
+      }
+    },
+    "dropped_columns": [
+      "uniqueid",
+      "year"
+    ],
+    "dropped_column_rationale": "uniqueid: unique-per-row; year: perfectly collinear with country"
+  },
+  "woe_parameters": {
+    "formula": "WoE_k = ln((g_k / G) / (b_k / B))",
+    "variable_definitions": {
+      "g_k": "count of y=0 (negative-class) observations in bin k",
+      "b_k": "count of y=1 (positive-class) observations in bin k",
+      "G": "total negative-class count",
+      "B": "total positive-class count",
+      "k": "bin index after monotonic binning"
+    },
+    "logic_for_lr": "WoE-transformed features + L2 regularization preserve the auditable per-feature decomposition regulators require (Section 3.1)",
+    "orientation_note": "For Zindi, y=1 = bank_account=1. This makes b_k count account-owners. Sign reversal is harmless to metrics but must be kept consistent."
+  },
+  "iv_parameters": {
+    "formula": "IV = sum_k ( (g_k/G) - (b_k/B) ) * WoE_k",
+    "threshold": 0.02,
+    "zindi_result": "all 10 features pass",
+    "purpose": "feature selection for the logistic regression component only"
+  },
+  "logistic_regression_parameters": {
+    "equation": "p_LR(x_i) = sigma(beta^T x_i + beta_0)",
+    "sigmoid": "sigma(z) = 1 / (1 + exp(-z))",
+    "beta": "coefficient vector in R^p",
+    "beta_0": "intercept",
+    "solver": "lbfgs",
+    "penalty": "L2",
+    "class_weight": "balanced",
+    "C_grid": [
+      0.01,
+      0.1,
+      1,
+      10
+    ],
+    "regularization_form": "lambda_LR * ||beta||_2^2",
+    "role": "interpretable linear baseline; provides auditable coefficients"
+  },
+  "residual_xgboost_parameters": {
+    "residual_equation": "r_i = y_i - p_LR(x_i)",
+    "residual_type": "raw response residual",
+    "residual_alternative_considered": [
+      "Pearson residuals",
+      "deviance residuals"
+    ],
+    "residual_choice_rationale": "direct regression target; aligns with residual-learning paradigm (He et al., 2016)",
+    "model_equation": "r_hat(x) = f_GBM(x) = sum_{m=1}^M nu * h_m(x)",
+    "h_m": "regression tree fitted at iteration m",
+    "n_estimators": 400,
+    "early_stopping": {
+      "enabled": true,
+      "metric": "validation AUC",
+      "patience": 50
+    },
+    "nu": 0.03,
+    "max_depth": 3,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "reg_lambda": 2,
+    "objective": "reg:squarederror",
+    "shallow_depth_rationale": "deeper trees allow boosting to dominate and erode the interpretability ratio (Section 5.2)",
+    "low_learning_rate_rationale": "encourages gradual residual correction, not aggressive replacement of the logistic baseline (Section 5.2)"
+  },
+  "standalone_xgboost_parameters": {
+    "n_estimators": 400,
+    "max_depth": 4,
+    "learning_rate": 0.03,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "reg_lambda": 2,
+    "objective": "binary:logistic",
+    "scale_pos_weight": "n0/n1 from training partition (see preprocessing_parameters.class_imbalance_handling.scale_pos_weight)",
+    "eval_metric": "auc",
+    "role": "non-interpretable performance frontier comparator"
+  },
+  "lightgbm_sensitivity_parameters": {
+    "purpose": "sensitivity check on the residual learner",
+    "configuration": "mirror the residual XGBoost settings as closely as possible; use objective='regression', learning_rate=0.03, num_leaves=7 (approximating max_depth=3), subsample=0.8, feature_fraction=0.8, lambda_l2=2",
+    "configuration_status": "UNSPECIFIED IN MANUSCRIPT — mirror settings are rational placeholders"
+  },
+  "adaptive_weighting_parameters": {
+    "uncertainty_proxy_equation": "u_LR(x) = 4 * p_LR(x) * (1 - p_LR(x))",
+    "uncertainty_proxy_range": [
+      0,
+      1
+    ],
+    "adaptive_weight_equation": "alpha*(x) = alpha_min + (alpha_max - alpha_min) * u_LR(x)^gamma",
+    "gamma_constraint": "gamma > 0 (controlling the concavity of the uncertainty-to-weight mapping)",
+    "alpha_min_grid": [
+      0.0,
+      0.1,
+      0.2
+    ],
+    "alpha_max_grid": [
+      0.3,
+      0.5,
+      0.8
+    ],
+    "gamma_grid": [
+      0.5,
+      1.0,
+      2.0
+    ],
+    "static_alpha_grid": [
+      0.0,
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      1.0
+    ],
+    "selection_criterion": "validation AUC",
+    "cross_validation_strategy": {
+      "static_alpha": "5-fold stratified cross-validation",
+      "adaptive_alpha": "5-fold stratified cross-validation",
+      "manuscript_inconsistency_note": "Table 1 states 3-fold for adaptive; Section 3.4 states 5-fold for all three. This config resolves to 5-fold. UNSPECIFIED IN MANUSCRIPT which is authoritative."
+    },
+    "selected_on_zindi": {
+      "alpha_min": 0.2,
+      "alpha_max": 0.8,
+      "gamma": 1.0
+    },
+    "taiwan_selection_note": "qualitatively close to Zindi choices (Section 6.1)"
+  },
+  "hybrid_prediction_parameters": {
+    "formula": "p_Hybrid(x) = clip(p_LR(x) + alpha*(x) * r_hat(x), 0, 1)",
+    "clip_lower_bound": 0,
+    "clip_upper_bound": 1,
+    "additive_terms": [
+      "p_LR(x)",
+      "alpha*(x) * r_hat(x)"
+    ],
+    "role": "final uncalibrated hybrid probability"
+  },
+  "interpretability_parameters": {
+    "rho_formula": "rho(x) = |p_LR(x)| / ( |p_LR(x)| + |alpha*(x) * r_hat(x)| )",
+    "rho_range": [
+      0,
+      1
+    ],
+    "rho_equals_one_when": "residual correction is zero",
+    "region_definitions": {
+      "fully_interpretable": {
+        "condition": "rho(x) >= 0.9"
+      },
+      "partially_interpretable": {
+        "condition": "0.7 <= rho(x) < 0.9"
+      },
+      "ml_driven": {
+        "condition": "rho(x) < 0.7"
+      }
+    },
+    "threshold_status": "indicative rather than theoretical; sensitivity evaluated empirically (Section 3.3)",
+    "probability_scale_caveat": "rho defined on the probability scale; high-p_LR observations are mechanically placed in the fully interpretable region",
+    "label_parity_caveat": "rho is not invariant under label reversal (y -> 1-y); interpretation tied to positive-class convention (default in Taiwan, account ownership in Zindi)"
+  },
+  "network_training_parameters": {
+    "two_stage_training": {
+      "stage_1": "fit logistic regression on WoE-transformed features",
+      "stage_2": "fit XGBoost on raw response residuals r_i = y_i - p_LR(x_i)",
+      "hyperparameter_tuning": "performed on training + validation partitions only",
+      "platt_calibration": "fitted on held-out validation fold only",
+      "test_partition_usage": "reserved strictly for final evaluation"
+    },
+    "alternating_minimization_scheme": {
+      "joint_loss_formula": "L(beta, f_GBM) = sum_{i=1}^N ell( y_i, clip(p_LR(x_i; beta) + alpha*(x_i; beta) * f_GBM(x_i), 0, 1) ) + lambda_LR * ||beta||_2^2 + Omega(f_GBM)",
+      "alpha_star_recomputation": "MANDATORY: alpha*(x) depends on p_LR(x; beta) through u_LR(x) = 4 p_LR(1-p_LR). At every alternating-minimization iteration, recompute p_LR and u_LR from the updated beta before recomputing alpha* and the fused prediction.",
+      "step_1": "hold f_GBM fixed; update beta by L-BFGS on joint loss",
+      "step_2": "hold beta fixed; refit f_GBM on updated response residuals",
+      "convergence_criterion": "change in held-out validation AUC",
+      "convergence_tolerance": 0.001,
+      "implementation_caveat": "step 2 minimizes squared error on residuals, not the joint binary cross-entropy; the scheme is NOT exact coordinate descent on L",
+      "compute_cost_factor_vs_two_stage": 4,
+      "reported_convergence_iterations": 3,
+      "reported_delta_auc_vs_two_stage": 0.0006,
+      "two_stage_auc": 0.8691,
+      "best_joint_auc": 0.8697,
+      "deployment_default": "two-stage training retained as operational default"
+    },
+    "random_seeds": {
+      "status": "fixed across runs; see partitioning_parameters.random_seed = 20260830 (placeholder)"
+    }
+  },
+  "calibration_parameters": {
+    "method": "Platt scaling",
+    "formula": "p_cal(x) = 1 / (1 + exp(a * p_Hybrid(x) + b))",
+    "fitted_on": "held-out validation fold (validation logits per Table 1)",
+    "applied_to": "test partition",
+    "parameter_a": "learned scaling parameter",
+    "parameter_b": "learned shift parameter",
+    "evaluation": {
+      "brier_score": "Brier = (1/n) * sum_{i=1}^n (p_cal(x_i) - y_i)^2",
+      "ece_formula": "ECE = sum_{k=1}^K ( |B_k| / n ) * |acc(B_k) - conf(B_k)|",
+      "ece_bins": 10,
+      "bin_type": "equal-width probability bins",
+      "reliability_diagram": "reported alongside ECE (Figure 1)"
+    }
+  },
+  "evaluation_metrics_parameters": {
+    "discrimination_metrics": {
+      "auc": "Area Under the ROC Curve on test partition",
+      "gini_formula": "Gini = 2 * AUC - 1",
+      "f1_score": "minority-class F1-score at decision threshold 0.5"
+    },
+    "calibration_metrics": {
+      "brier_score": "Brier = (1/n) * sum (p_cal - y)^2",
+      "ece": "Expected Calibration Error, K = 10 equal-width bins",
+      "reliability_diagram": "observed accuracy vs confidence per bin"
+    },
+    "interpretability_behaviour_metrics": {
+      "rho_distribution": "distribution of rho(x) on test partition",
+      "region_shares": "share of test observations in each of the three regions",
+      "region_base_rates": "within-region default rate (Taiwan) or positive-class rate (Zindi)",
+      "per_region_auc": "LR AUC and Hybrid AUC computed within each region"
+    },
+    "classification_threshold_for_f1": 0.5,
+    "threshold_recalibration_note": "operational thresholds typically use cost-sensitive optimisation or Youden's J, not 0.5 (Section 6.1)"
+  },
+  "protected_attribute_parameters": {
+    "gender": {
+      "categories": [
+        "male",
+        "female"
+      ],
+      "reference_group": "male",
+      "raw_mapping": {
+        "Male": "male",
+        "Female": "female"
+      }
+    },
+    "location": {
+      "categories": [
+        "urban",
+        "rural"
+      ],
+      "reference_group": "urban",
+      "raw_mapping": {
+        "Urban": "urban",
+        "Rural": "rural"
+      }
+    },
+    "education": {
+      "categories": [
+        "primary or less",
+        "secondary or above"
+      ],
+      "reference_group": "secondary or above",
+      "raw_category_to_audit_bucket": {
+        "No formal education": "primary or less",
+        "Primary education": "primary or less",
+        "Secondary education": "secondary or above",
+        "Tertiary education": "secondary or above",
+        "Vocational/Specialised training": "secondary or above",
+        "Other/Dont know/RTA": "secondary or above"
+      },
+      "collapse_rationale": "ensures adequate per-cell counts (Section 4.5)",
+      "placeholder_status": "UNSPECIFIED IN MANUSCRIPT - the bucket for 'Vocational/Specialised training' and 'Other/Dont know/RTA' is a registered placeholder. Vocational is assigned to 'secondary or above' on empirical grounds: that assignment reproduces the Table 4 test cells to within 21 observations, against 173 for the alternative, a gap far exceeding the observed split noise. 'Other/Dont know/RTA' (35 rows) is below the resolution of that constraint and follows the convention the original configuration already applied to 'Other' and 'Don't know/Refused'."
+    },
+    "country": {
+      "categories": [
+        "Kenya",
+        "Rwanda",
+        "Tanzania",
+        "Uganda"
+      ],
+      "reference_group": "Kenya",
+      "reference_rationale": "largest single-country subsample (Section 4.5)",
+      "reference_sensitivity": "left to future work (Section 4.5)"
+    }
+  },
+  "fairness_audit_parameters": {
+    "routing_rate_formula": "Pr[rho(x) < 0.7 | A = g]",
+    "disparate_impact_formula": "DI(g) = Pr[y_hat = 1 | A = g] / Pr[y_hat = 1 | A = g_ref]",
+    "equalized_odds_formula": "max_g { |TPR(g) - TPR(g_ref)|, |FPR(g) - FPR(g_ref)| }",
+    "classification_threshold_for_di_and_eod": 0.5,
+    "four_fifths_reference_interval": [
+      0.8,
+      1.25
+    ],
+    "four_fifths_origin": "U.S. EEOC 1978 Uniform Guidelines on Employee Selection Procedures",
+    "four_fifths_status": "reference threshold only; not a decision rule (Section 3.8)",
+    "statistics_computed": {
+      "pooled": "over all test observations",
+      "per_region": "restricted to each of the three interpretability regions"
+    },
+    "post_treatment_caveat": "rho(x) is causally downstream of X; per-region DI/EOD are descriptive stratifications, not causal fairness metrics (Rosenbaum, 1984)",
+    "multiple_comparison_adjustment": false,
+    "region_conditional_interpretation": "should not be read as 'fairness within the region'",
+    "degenerate_cell_handling": "ML-driven region has no predicted positives for reference groups; DI/EOD reported as '---' (undefined), not zero (Tables 5 and 6)"
+  },
+  "thin_file_parameters": {
+    "composite_index_components": [
+      "education_level (ordinal, standardized)",
+      "cellphone_access (binary, standardized)",
+      "formal_job_indicator (binary, standardized)"
+    ],
+    "education_ordinal_mapping": {
+      "No formal education": 0,
+      "Primary education": 1,
+      "Secondary education": 2,
+      "Tertiary education": 3,
+      "Vocational/Specialised training": 2,
+      "Other/Dont know/RTA": 0
+    },
+    "formal_job_indicator_mapping": {
+      "Formally employed Government": 1,
+      "Formally employed Private": 1,
+      "Informally employed": 0,
+      "Self employed": 0,
+      "Farming and Fishing": 0,
+      "Remittance Dependent": 0,
+      "Government Dependent": 0,
+      "Other Income": 0,
+      "No Income": 0,
+      "Dont Know/Refuse to answer": 0
+    },
+    "standardization": {
+      "method": "z-score",
+      "formula": "z_j = (x_j - mean_j_train) / std_j_train",
+      "fit_on": "full Zindi training set",
+      "freeze": true
+    },
+    "construction": "sum of standardised components: index = z_education + z_cellphone + z_formaljob",
+    "definition": "bottom quartile of the composite index, threshold applied INCLUSIVELY (index <= tau)",
+    "quantile_threshold_computed_on": "full Zindi training set",
+    "threshold_applied_identically_to": [
+      "validation partition",
+      "test partition"
+    ],
+    "expected_test_subgroup_profile": {
+      "n": 1559,
+      "share_of_test_set": 0.331,
+      "positive_class_rate": 0.024
+    },
+    "hypotheses_tested": {
+      "h1": "residual learner contributes more for thin-file borrowers (hybrid AUC gain over LR larger on thin-file)",
+      "h1_result": "supported: +0.058 on thin-file vs +0.015 full population",
+      "h2": "rho(x) distribution shifted toward smaller values on thin-file subgroup",
+      "h2_result": "not supported: mean rho 0.718 thin-file vs 0.703 full test set"
+    },
+    "mapping_placeholder_status": "UNSPECIFIED IN MANUSCRIPT - 'Formally employed Government' and 'Formally employed Private' are the Zindi spellings of the categories the original configuration named 'Government' and 'Formally employed Private sector', and inherit their value of 1. 'Government Dependent', 'Other Income', 'No Income' and 'Dont Know/Refuse to answer' denote absence of formal employment and take 0, following the convention the original configuration applied to 'Other' and 'Don't know/Refused'. The declared subgroup size does NOT uniquely determine this mapping: 79 of 504 candidate mappings satisfy n = 1559 +/- 20, so the assignment is settled semantically and the target is used only as a consistency check.",
+    "tie_handling": "The composite index is built from three discrete components and takes only 15 distinct values, so ties at tau are massive: 496 test rows sit exactly at tau. A strict comparison (index < tau) yields n = 1053 (22.4% of test); the inclusive comparison (index <= tau) yields n = 1553 (33.0%), against the declared 1559 (33.1%). The manuscript's own subgroup size therefore requires the INCLUSIVE rule. The shipped implementation uses the strict rule and must be corrected."
+  },
+  "hard_soft_split_parameters": {
+    "hard_block": [
+      "age_of_respondent",
+      "gender_of_respondent",
+      "marital_status",
+      "education_level",
+      "household_size",
+      "location_type",
+      "country"
+    ],
+    "soft_block": [
+      "cellphone_access",
+      "job_type",
+      "relationship_with_head"
+    ],
+    "logistic_regression_features": "hard block only",
+    "residual_learner_features": "hard block + soft block",
+    "interpretation_of_rho_approximately_one": "decision explainable from hard demographics alone",
+    "interpretation_of_rho_below_0.7": "soft behavioural proxies materially shifted the outcome",
+    "methodological_status": "reported as a methodological note rather than headline contribution (Section 3.7)",
+    "limitation": "soft block on Zindi is modest in width"
+  },
+  "joint_optimization_parameters": {
+    "joint_loss_formula": "L(beta, f_GBM) = sum_{i=1}^N ell( y_i, clip(p_LR(x_i; beta) + alpha*(x_i; beta) * f_GBM(x_i), 0, 1) ) + lambda_LR * ||beta||_2^2 + Omega(f_GBM)",
+    "ell": "binary cross-entropy loss",
+    "lambda_LR": "L2 penalty on logistic-regression coefficients",
+    "Omega(f_GBM)": "XGBoost complexity penalty",
+    "step_1": "hold f_GBM fixed; update beta by L-BFGS on L",
+    "step_2": "hold beta fixed; refit f_GBM on updated response residuals r_i = y_i - p_LR(x_i; beta)",
+    "convergence_criterion": "change in held-out validation AUC",
+    "convergence_tolerance": 0.001,
+    "alpha_star_recomputation": "MANDATORY: recompute p_LR, u_LR, and alpha* from the updated beta at every fixed-point iteration before constructing the fused prediction.",
+    "implementation_caveat": "step 2 minimizes squared error on residuals, not the joint binary cross-entropy; the scheme is NOT coordinate descent on L",
+    "true_functional_gradient_descent": "left as future work (Section 3.10)",
+    "compute_cost_factor_vs_two_stage": 4,
+    "reported_convergence_iterations": 3,
+    "reported_delta_auc_vs_two_stage": 0.0006,
+    "two_stage_auc": 0.8691,
+    "best_joint_auc": 0.8697,
+    "deployment_default": "two-stage training retained (Section 6.5)",
+    "taiwan_run": "not performed (Section 6.5)"
+  },
+  "bootstrap_inference_parameters": {
+    "auc_difference_resamples": 2000,
+    "fairness_quantity_resamples": 500,
+    "sampling_method": "with replacement, stratified",
+    "auc_stratification": "within positive-class and negative-class strata separately",
+    "fairness_stratification": "within (class x attribute) strata",
+    "auc_interval_type": "percentile-based 95% confidence interval",
+    "fairness_interval_type": "percentile-based 95% confidence interval",
+    "primary_interval_statement": "bootstrap CI",
+    "primary_hypothesis_test": "DeLong test"
+  },
+  "delong_test_parameters": {
+    "method": "DeLong test for correlated ROC curves",
+    "implementation": "fast midrank algorithm of Sun and Xu (2014)",
+    "one_sided_alternative": "Hybrid AUC > comparator AUC",
+    "two_sided_alternative": "Hybrid AUC != comparator AUC",
+    "tested_pairwise_comparisons": [
+      "Hybrid vs Logistic Regression",
+      "Hybrid vs XGBoost"
+    ],
+    "reported_results_table": "Table 9",
+    "floor_boundedness_note": "DeLong provides an asymptotic z-statistic and p-value not floor-bounded by bootstrap resample count (Section 5.6)"
+  },
+  "shap_explanation_parameters": {
+    "method": "TreeSHAP",
+    "applied_to_model_component": "residual learner f_GBM only",
+    "restricted_to_region": "ML-driven region: rho(x) < 0.7",
+    "shap_decomposition_preserved": "attributions restricted to residual component to preserve additive decomposition of Equation (5)",
+    "stability_screen_resamples": 500,
+    "stability_metric": "bootstrap standard deviation of feature rank",
+    "reported_top_k_set_preservation": "top-5 feature set preserved in 74.0% of resamples",
+    "top_two_rank_stability": "perfectly stable (sigma = 0.00 for ranks 1 and 2)",
+    "instability_interpretation": "treated as a flag on individual explanations, not a property of the framework (Section 3.6)",
+    "target_region_n_on_zindi": 2796,
+    "top_features_expected": {
+      "1": "cellphone_access_No (mean |SHAP| = 0.0486, rank sigma = 0.00)",
+      "2": "age_of_respondent (mean |SHAP| = 0.0300, rank sigma = 0.00)",
+      "3": "relationship_with_head_Head of Household (mean |SHAP| = 0.0259, rank sigma = 0.28)",
+      "4": "country_Kenya (mean |SHAP| = 0.0255, rank sigma = 0.28)",
+      "5": "country_Rwanda (mean |SHAP| = 0.0188, rank sigma = 0.44)"
+    }
+  },
+  "training_protocol_parameters": {
+    "preprocessing_fit": "training partition only",
+    "hyperparameter_tuning": "training + validation partitions",
+    "residual_learning": "training partition only",
+    "platt_calibration": "validation fold only",
+    "test_partition_usage": "final evaluation only",
+    "random_seeds": "fixed across runs; see partitioning_parameters.random_seed = 20260830 (placeholder)",
+    "zindi_split": "60/20/20 stratified",
+    "train_n": 14114,
+    "test_n": 4705,
+    "test_positive_rate": 0.1407
+  },
+  "essential_methodological_notes": {
+    "zindi_target_reframing": "bank-account ownership is used as a deliberate proxy for the eligibility gate; not a default label (Section 4.2)",
+    "rho_probability_scale_caveat": "the interpretability ratio is defined on the probability scale; high-p_LR borrowers are mechanically routed to the fully interpretable region (Section 3.3)",
+    "rho_label_parity_caveat": "rho is not invariant to label reversal; positive-class convention is default (Taiwan) and account ownership (Zindi)",
+    "four_fifths_reference_status": "the [0.8, 1.25] interval is only a reference threshold, not a decision rule (Section 3.8)",
+    "post_treatment_conditioning_caveat": "conditioning on rho(x) is conditioning on a post-treatment variable; per-region DI/EOD are descriptive, not causal (Section 3.8; Rosenbaum 1984)",
+    "degenerate_ml_driven_region": "the ML-driven region has near-empty predicted-positive cells for reference groups; DI/EOD are undefined there, not zero (Tables 5, 6)",
+    "multiple_comparison_adjustment": "not applied; consistent with the descriptive-audit intent (Section 5.6)",
+    "structural_vs_model_disparity": "the audit detects disparities but does not by itself disentangle structural population inequality from model-induced disparity (Section 7.4)",
+    "alternating_minimization_not_coordinate_descent": "the step that refits the residual learner minimizes squared error on residuals, so the scheme is not exact coordinate descent on the joint loss (Section 3.10)",
+    "calibration_source": "the LR + Platt ablation shows the calibration gain comes from Platt scaling, while the residual learner contributes the discrimination gain (Section 6.1)",
+    "thin_file_rho_hypothesis": "the hypothesis that thin-file implies lower rho was not supported; thin-file borrowers are confidently predicted negative by LR, reducing the residual weight (Section 6.4)"
+  },
+  "plot_construction_parameters": {
+    "general_plotting_defaults": {
+      "figure_library": "matplotlib (paper uses TikZ placeholders)",
+      "figure_dpi": 300,
+      "font_size": 10,
+      "line_width": 1.5,
+      "dashed_line_style": "--",
+      "panel_layout": "two-panel side-by-side for ROC and reliability"
+    },
+    "fig1_roc_reliability": {
+      "title": "ROC and Reliability diagrams --- Zindi FSD test-set diagnostics",
+      "left_panel_title": "ROC --- Zindi FSD",
+      "right_panel_title": "Reliability diagram --- Zindi FSD",
+      "included_curves": [
+        "LR (AUC = 0.854)",
+        "XGBoost (AUC = 0.873)",
+        "Hybrid Platt (AUC = 0.869)"
+      ],
+      "included_ece_values": [
+        "LR (ECE = 0.234)",
+        "Hybrid uncalibrated (ECE = 0.080)",
+        "Hybrid Platt (ECE = 0.024)"
+      ]
+    },
+    "fig2_rho_distribution": {
+      "title": "Distribution of rho(x) --- Zindi FSD",
+      "threshold_line_1": {
+        "value": 0.7,
+        "label": "rho = 0.7 (Partially)",
+        "style": "dashed red"
+      },
+      "threshold_line_2": {
+        "value": 0.9,
+        "label": "rho = 0.9 (Fully)",
+        "style": "dashed blue"
+      },
+      "distribution_characteristics": "bimodal: primary mode below 0.7; secondary mode near 1.0"
+    },
+    "fig3_fairness_routing": {
+      "title": "Per-subgroup region routing --- Zindi FSD",
+      "x_axis_groups": [
+        "Gender",
+        "Location",
+        "Education",
+        "Country"
+      ],
+      "displayed_statistic": "share routed to ML-driven region (rho < 0.7)",
+      "reference_group_color": "grey",
+      "comparison_group_color": "red"
+    },
+    "fig4_shap_beeswarm": {
+      "title": "TreeSHAP beeswarm summary --- ML-driven region",
+      "region": "rho < 0.7",
+      "n_observations": 2796,
+      "top_features_to_display": 12,
+      "x_axis_label": "SHAP contribution to r_hat(x)",
+      "color_meaning": "feature value",
+      "expected_top_12_features": [
+        "cellphone_access_No",
+        "age_of_respondent",
+        "relationship_with_head_Head of Household",
+        "country_Kenya",
+        "country_Rwanda",
+        "education_level_No formal education",
+        "cellphone_access_Yes",
+        "education_level_Secondary education",
+        "job_type_Farming and Fishing",
+        "gender_of_respondent_Female",
+        "job_type_Self employed",
+        "location_type_Rural"
+      ]
+    }
+  },
+  "equation_parameter_map": {
+    "Eq1": {
+      "name": "Logistic regression probability",
+      "parameters": [
+        "p_LR",
+        "beta",
+        "beta_0",
+        "x_i",
+        "sigma"
+      ]
+    },
+    "Eq2": {
+      "name": "Weight of Evidence",
+      "parameters": [
+        "WoE_k",
+        "g_k",
+        "b_k",
+        "G",
+        "B"
+      ]
+    },
+    "Eq3": {
+      "name": "Raw response residual",
+      "parameters": [
+        "r_i",
+        "y_i",
+        "p_LR(x_i)"
+      ]
+    },
+    "Eq4": {
+      "name": "Gradient boosting residual estimator",
+      "parameters": [
+        "r_hat",
+        "f_GBM",
+        "M",
+        "nu",
+        "h_m"
+      ]
+    },
+    "Eq5": {
+      "name": "Hybrid prediction",
+      "parameters": [
+        "p_Hybrid",
+        "clip",
+        "alpha*",
+        "p_LR",
+        "r_hat"
+      ]
+    },
+    "Eq6": {
+      "name": "Interpretability ratio",
+      "parameters": [
+        "rho",
+        "p_LR",
+        "alpha*",
+        "r_hat"
+      ]
+    },
+    "Eq7": {
+      "name": "Interpretability regions",
+      "parameters": [
+        "rho",
+        "0.9",
+        "0.7"
+      ]
+    },
+    "Eq8": {
+      "name": "LR uncertainty proxy",
+      "parameters": [
+        "u_LR",
+        "p_LR"
+      ]
+    },
+    "Eq9": {
+      "name": "Adaptive ensemble weight",
+      "parameters": [
+        "alpha*",
+        "alpha_min",
+        "alpha_max",
+        "u_LR",
+        "gamma"
+      ]
+    },
+    "Eq10": {
+      "name": "Platt scaling",
+      "parameters": [
+        "p_cal",
+        "a",
+        "b",
+        "p_Hybrid"
+      ]
+    },
+    "Eq11": {
+      "name": "Expected Calibration Error",
+      "parameters": [
+        "ECE",
+        "K",
+        "B_k",
+        "n",
+        "acc",
+        "conf"
+      ]
+    },
+    "Eq12": {
+      "name": "Joint loss",
+      "parameters": [
+        "L",
+        "beta",
+        "f_GBM",
+        "ell",
+        "clip",
+        "alpha*",
+        "lambda_LR",
+        "Omega"
+      ]
+    },
+    "Unnumbered-A": {
+      "name": "Region routing rate",
+      "parameters": [
+        "Pr",
+        "rho",
+        "0.7",
+        "A",
+        "g"
+      ]
+    },
+    "Unnumbered-B": {
+      "name": "Disparate-impact ratio",
+      "parameters": [
+        "DI",
+        "y_hat",
+        "A",
+        "g",
+        "g_ref"
+      ]
+    },
+    "Unnumbered-C": {
+      "name": "Equalized-odds difference",
+      "parameters": [
+        "TPR",
+        "FPR",
+        "g",
+        "g_ref"
+      ]
+    },
+    "Unnumbered-D": {
+      "name": "Gini coefficient",
+      "parameters": [
+        "Gini",
+        "AUC"
+      ]
+    },
+    "Unnumbered-E": {
+      "name": "Four-fifths reference interval",
+      "parameters": [
+        "DI",
+        "0.8",
+        "1.25"
+      ]
+    }
+  },
+  "code_and_data_availability": {
+    "code_status": "will be released prior to journal submission under a permissive open-source license",
+    "repository_url": "to be inserted at camera-ready stage; no URL present in the paper",
+    "main_script": "run_zindi_paper.py",
+    "script_line_count_approx": 800,
+    "runtime_note": "end-to-end runtime under 5 minutes on a recent laptop CPU",
+    "included_components": [
+      "fairness audit module with stratified paired bootstrap and DeLong test",
+      "alternating fixed-point joint-optimization routine",
+      "full preprocessing pipeline"
+    ],
+    "zindi_data_url": "https://zindi.africa/competitions/financial-inclusion-in-africa",
+    "taiwan_data_url": "http://archive.ics.uci.edu/ml"
+  }
+}
