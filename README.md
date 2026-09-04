@@ -115,7 +115,7 @@ The class convention is pinned by the configuration: $`g_k`$ counts $`y = 0`$ an
 **2. The Hybrid Prediction Rule.** The scorecard produces $`p_{\text{LR}}(x) = \sigma(\hat{\beta}^\top x + \hat{\beta}_0)`$ under L2-regularised maximum likelihood with balanced class weights, the inverse-regularisation constant $`C`$ selected by five-fold stratified cross-validation over $`\{0.01, 0.1, 1, 10\}`$. The booster is fitted on the raw response residual $`r_i = y_i - p_{\text{LR}}(x_i)`$ under squared-error loss, and the two branches combine as
 
 ```math
-p_{\text{Hybrid}}(x) = \operatorname{clip}\!\left(p_{\text{LR}}(x) + \alpha^*(x)\,\hat{r}(x),\; 0,\; 1\right), \qquad \hat{r}(x) = f_{\text{GBM}}(x) = \sum_{m=1}^{M}\nu\, h_m(x).
+p_{\text{Hybrid}}(x) = \mathrm{clip}\!\left(p_{\text{LR}}(x) + \alpha^*(x)\,\hat{r}(x),\; 0,\; 1\right), \qquad \hat{r}(x) = f_{\text{GBM}}(x) = \sum_{m=1}^{M}\nu\, h_m(x).
 ```
 
 The residual definition is load-bearing. Because $`r_i`$ is a *raw response* residual rather than a gradient, the booster's output lives on the probability scale, which is what permits the additive decomposition below to be read directly as a share.
@@ -152,7 +152,7 @@ $`\rho(x) = 1`$ exactly when the residual correction vanishes. The thresholds ar
 ```math
 p_{\text{cal}}(x) = \frac{1}{1 + \exp\!\left(a\, p_{\text{Hybrid}}(x) + b\right)},
 \qquad
-\text{ECE} = \sum_{k=1}^{K}\frac{|B_k|}{n}\left|\operatorname{acc}(B_k) - \operatorname{conf}(B_k)\right|, \quad K = 10 .
+\text{ECE} = \sum_{k=1}^{K}\frac{|B_k|}{n}\left|\mathrm{acc}(B_k) - \mathrm{conf}(B_k)\right|, \quad K = 10 .
 ```
 
 Region assignments are computed on the **uncalibrated** hybrid probabilities: calibration changes the probability scale, never $`\rho(x)`$ or region membership.
@@ -174,7 +174,7 @@ Two disciplines govern the interpretation. First, **degenerate cells**: when the
 **7. Inference.** Two complementary vehicles, deliberately not interchangeable. The stratified paired bootstrap ($`B = 2000`$) resamples with replacement **within** the positive and negative test strata separately, preserving the marginal class distribution, and computes both models' AUCs on the same resample to form $`\Delta\text{AUC}^{(b)}`$; the interval is the 2.5th and 97.5th percentiles. Models are never refitted inside the bootstrap — the routine consumes pre-computed test predictions, which makes refitting structurally impossible rather than merely prohibited. The DeLong test uses the Sun–Xu fast midrank algorithm for the covariance of two correlated AUC estimates:
 
 ```math
-z = \frac{\text{AUC}_1 - \text{AUC}_2}{\sqrt{\widehat{\operatorname{Var}}\!\left(\text{AUC}_1 - \text{AUC}_2\right)}},
+z = \frac{\text{AUC}_1 - \text{AUC}_2}{\sqrt{\widehat{\mathrm{Var}}\!\left(\text{AUC}_1 - \text{AUC}_2\right)}},
 ```
 
 reported one-sided and two-sided. No multiple-comparison correction is applied, consistent with the descriptive audit intent, and that decision is recorded in the audit log rather than left implicit.
@@ -198,7 +198,7 @@ Stability is screened by $`B = 500`$ observation-level bootstrap resamples, repo
 **10. Alternating-Minimisation Joint Optimisation.** The joint objective couples both branches:
 
 ```math
-\mathcal{L}\!\left(\beta, f^{(t)}\right) = \sum_{i=1}^{N}\ell\!\left(y_i,\ \operatorname{clip}\!\left(p_{\text{LR}}(x_i;\beta) + \alpha^*(x_i;\beta)f^{(t)}(x_i),\,0,\,1\right)\right) + \lambda_{\text{LR}}\lVert\beta\rVert_2^2 ,
+\mathcal{L}\!\left(\beta, f^{(t)}\right) = \sum_{i=1}^{N}\ell\!\left(y_i,\ \mathrm{clip}\!\left(p_{\text{LR}}(x_i;\beta) + \alpha^*(x_i;\beta)f^{(t)}(x_i),\,0,\,1\right)\right) + \lambda_{\text{LR}}\lVert\beta\rVert_2^2 ,
 ```
 
 with $`\ell(y,p) = -[y\ln p + (1-y)\ln(1-p)]`$. The fixed-point scheme alternates an L-BFGS update of $`\beta`$, residual recomputation, a booster refit, and a validation-AUC evaluation, converging at tolerance $`10^{-3}`$. The **mandatory rule** is that $`\alpha^*(x;\beta)`$ be recomputed from the updated $`p_{\text{LR}}`$ at every iteration; this implementation computes it *inside the objective*, which makes a stale weight unreachable rather than merely avoided.
@@ -208,7 +208,7 @@ with $`\ell(y,p) = -[y\ln p + (1-y)\ln(1-p)]`$. The fixed-point scheme alternate
 Below is a diagram which summarizes the proposed approach:
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/chirindaopensource/interpretable_hybrid_credit_scoring_for_thin_file_and_underbanked_populations/main/interpretable_hybrid_credit_scoring_for_thin_file_and_underbanked_populations_ipo_main.png" alt="Interpretable Hybrid Credit Scoring for Thin-File and Underbanked Populations — Project Overview" width="100%">
+  <img src="https://raw.githubusercontent.com/chirindaopensource/interpretable_hybrid_credit_scoring_for_thin_file_and_underbanked_populations/main/interpretable_hybrid_credit_scoring_for_thin_file_and_underbanked_populations_ipo_main_2.png" alt="Interpretable Hybrid Credit Scoring for Thin-File and Underbanked Populations — Project Overview" width="100%">
 </div>
 
 ## Features
@@ -240,7 +240,7 @@ The core analytical steps directly implement the methodology from the paper:
 6.  **IV Filtering and One-Hot Encoding (Task 6):** `orchestrate_iv_filter_and_ohe` computes the Information Values, retains features at $`\text{IV} \ge 0.02`$, and builds the boosting branch's one-hot matrix with frozen level sets, reindexing each partition against the frozen column list with zero fill so an unseen level yields the all-zero indicator vector in both drift directions.
 7.  **Logistic Baseline (Task 7):** `orchestrate_fit_logistic` selects $`C`$ by five-fold stratified CV, fits with `lbfgs`, L2 and balanced class weights at `max_iter=1000`, and logs a convergence warning when the solver reaches the iteration cap — a diagnostic the specification does not require and which separates an under-converged coefficient vector from a converged one.
 8.  **Residuals (Task 8):** `orchestrate_compute_residuals` computes $`r_i = y_i - p_{\text{LR}}(x_i)`$ on all three partitions, asserts containment in $`[-1, 1]`$, and **halts** when the training residual standard deviation falls below $`10^{-3}`$, which would indicate an essentially constant scorecard.
-9.  **Residual Booster (Task 9):** `orchestrate_fit_residual_xgboost` fits `reg:squarederror` at depth 3, learning rate 0.03, 400 estimators, subsample and column-subsample 0.8, $`\lambda = 2`$, with patience-50 early stopping on the provisional hybrid validation AUC, then asserts $`\operatorname{corr}(r, \hat{r}) > 0`$.
+9.  **Residual Booster (Task 9):** `orchestrate_fit_residual_xgboost` fits `reg:squarederror` at depth 3, learning rate 0.03, 400 estimators, subsample and column-subsample 0.8, $`\lambda = 2`$, with patience-50 early stopping on the provisional hybrid validation AUC, then asserts $`\mathrm{corr}(r, \hat{r}) > 0`$.
 10. **Standalone Comparator (Task 10):** `orchestrate_fit_standalone_xgboost` fits `binary:logistic` at depth 4 with $`\text{scale\_pos\_weight} = n_0/n_1`$ computed on training and recorded exactly.
 11. **Adaptive Weighting (Task 11):** `orchestrate_select_adaptive_weights` enumerates all 27 triples under five-fold stratified CV, refitting the scorecard, residuals and booster within each fold, and freezes the per-observation $`\alpha^*`$ arrays.
 12. **Hybrid and Decomposition (Task 12):** `orchestrate_build_hybrid_and_rho` forms the clipped hybrid, computes $`\rho(x)`$ with a zero-denominator guard returning $`\rho = 1`$ (the correct limit when both contributions vanish), assigns regions, and aggregates region shares, within-region positive rates and the full $`\rho`$ distribution.
@@ -926,4 +926,3 @@ https://github.com/chirindaopensource/interpretable_hybrid_credit_scoring_for_th
 ---
 
 *This README was generated based on the structure and content of the `interpretable_hybrid_credit_scoring_for_thin_file_and_underbanked_populations_draft.ipynb` notebook and follows best practices for research software documentation.*
-
