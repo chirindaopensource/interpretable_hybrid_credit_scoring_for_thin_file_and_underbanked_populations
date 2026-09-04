@@ -1,0 +1,116 @@
+#!/usr/bin/env python3
+# ==============================================================================#
+#
+#  Project Requirements (requirements.txt) - Interpretable Hybrid Credit
+#  Scoring for Thin-File and Underbanked Populations
+#
+#  This file pins the complete scientific-computing dependency set of
+#  "Interpretable hybrid credit scoring for thin-file and underbanked
+#  populations: A fairness-aware residual learning framework with evidence
+#  from East African financial inclusion data" by Belise Kanziga,
+#  Yae U. Gaba and Olivier Kanamugire (2026). It delivers an auditable,
+#  fair and interpretable machine-learning credit-decisioning pipeline that
+#  simultaneously preserves predictive accuracy, satisfies regulator-visible
+#  explanation requirements, and proactively prevents protected subgroups
+#  from being concealed within opaque model regions of a hybrid scorecard.
+#
+#  Core Methodological Components:
+#  * Weight-of-Evidence scorecard baseline (logistic regression, L2, balanced)
+#  * Raw-response residual learning via shallow gradient-boosted regression trees
+#  * Probability-scale interpretability ratio rho(x) and the three-region partition
+#  * Adaptive ensemble weighting alpha*(x) from Bernoulli-variance uncertainty
+#  * Platt calibration with Expected Calibration Error and reliability diagnostics
+#  * Fairness audit at interpretability-region granularity (routing rate,
+#    disparate-impact ratio, equalized-odds difference, four-fifths reference)
+#  * Stratified paired-bootstrap confidence intervals and DeLong z-tests
+#  * TreeSHAP attribution and bootstrap stability screening on the residual branch
+#  * Thin-file segmentation and pre-registered hypothesis testing
+#  * Alternating-minimization joint-optimization fixed-point scheme
+#  * Robustness analyses (threshold, LightGBM and reference-group sensitivity)
+#  * Taiwan Credit Default continuity benchmark and Task 1-23 orchestration
+#
+#  Technical Implementation Features:
+#  * Training-only frozen statistics (imputation, winsorization, binning,
+#    WoE, one-hot, adaptive weights, Platt parameters) with a hard test barrier
+#  * Deterministic seeding, SHA-256 frame digests and JSON checkpointing
+#  * State-dictionary pipeline with per-callable verification and fidelity
+#    diagnostics against the manuscript headline results
+#  * CPU-only reproducible end-to-end execution (five minutes or less)
+#
+#  Paper Reference:
+#  Kanziga, B., Gaba, Y. U., & Kanamugire, O. (2026). Interpretable hybrid
+#  credit scoring for thin-file and underbanked populations: A fairness-aware
+#  residual learning framework with evidence from East African financial
+#  inclusion data. arXiv preprint arXiv:2608.26837.
+#  https://arxiv.org/abs/2608.26837
+#
+#  Author: CS Chirinda
+#  License: MIT
+#  Version: 1.0.0
+#
+# ==============================================================================#
+
+# ==============================================================================#
+# Verification record
+# ==============================================================================#
+# The exact pins below are the versions under which the pipeline's Task 1,
+# Task 2 and Task 3 validation, cleansing and partitioning gates were
+# executed and passed (Python 3.14.4, full published scale: 23,524 Zindi rows
+# plus 30,000 Taiwan rows). Two environment notes travel with these pins:
+#
+#   (a) pandas is pinned to 3.0.x.  pandas 3 rejects the DataFrame.drop
+#       (columns=..., axis=1) combination that the assessed notebook uses;
+#       the documented one-line compatibility shim (see the Usage Example in
+#       README.md) is therefore required with pandas >= 3.0.  Users who
+#       prefer the notebook unmodified should install pandas 2.x instead.
+#
+#   (b) psutil is the guarded cross-platform fallback for the Task 20
+#       resident-set-size memory log.  Its absence is tolerated (the probe
+#       degrades to None), so it is declared optional with a floor rather
+#       than an exact pin.
+# ==============================================================================#
+
+# ==============================================================================#
+# Standard library - no pip installation required
+# ==============================================================================#
+# copy, hashlib, itertools, json, logging, math, sys, time, warnings,
+# dataclasses (dataclass, field), datetime (datetime, timezone),
+# pathlib (Path), typing (Any, Callable, Dict, Iterable, List, Mapping,
+# Optional, Sequence, Set, Tuple, Union) and, on POSIX systems, resource.
+# These ship with CPython 3.11+ and are intentionally not listed below.
+
+# ==============================================================================#
+# Required third-party dependencies (verified pins)
+# ==============================================================================#
+
+# Core numerical stack: ndarray arithmetic, tabular frames, scientific functions
+numpy==2.4.6
+pandas==3.0.3
+scipy==1.18.0
+
+# Machine-learning stack: the logistic baseline and the boosting branches
+scikit-learn==1.9.0
+xgboost==3.4.0
+lightgbm==4.7.0
+
+# Model explanations: TreeSHAP attributions on the residual learner only
+shap==0.52.0
+
+# Configuration loading: required by load_study_configuration (config.yaml),
+# though deliberately absent from the notebook's module import block
+PyYAML==6.0.3
+
+# ==============================================================================#
+# Optional dependencies
+# ==============================================================================#
+
+# Cross-platform fallback for the resident-set-size memory log (guarded
+# import; the probe degrades gracefully when absent)
+psutil>=5.9
+
+# Synthetic-data generation in the Usage Example only; not required to run
+# the pipeline itself
+Faker==40.37.0
+
+# Notebook runtime; install in a dedicated environment if desired
+jupyter>=1.0
