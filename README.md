@@ -55,7 +55,7 @@ This repository contains an **independent**, professional-grade Python implement
 *   **Yaé U. Gaba**
 *   **Olivier Kanamugire**
 
-The above-referenced paper has no publicly-accessible companion code base; this project translates its mathematical specifications into robust, versioned, executable software artifacts. The project delivers a **decision rule whose auditability is a measured quantity rather than an assertion**: a logistic-regression scorecard corrected by a gradient-boosted learner fitted on its raw response residuals, decomposed at every prediction into an interpretability ratio $`\rho(x)`$ that reports the share of the decision attributable to the linear branch, together with a fairness audit conducted **at the granularity of the three interpretability regions** — the contribution that aggregate fairness metrics structurally cannot provide.
+The above-referenced paper has no publicly-accessible companion code base; this project translates its mathematical specifications into robust, versioned, executable software artifacts. The project delivers a **decision rule whose auditability is a measured quantity rather than an assertion**: a logistic-regression scorecard corrected by a gradient-boosted learner fitted on its raw response residuals, decomposed at every prediction into an interpretability ratio $`\rho(x)`$. The interpretability ratio $`\rho(x)`$ reports the share of the decision attributable to the linear branch, together with a fairness audit conducted **at the granularity of the three interpretability regions** — i.e. the contribution that aggregate fairness metrics structurally cannot provide.
 
 ## Table of Contents
 
